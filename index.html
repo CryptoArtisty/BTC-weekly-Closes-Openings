@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SwingBTC Weekly</title>
+
+  <script src="https://unpkg.com/lightweight-charts@4.0.0/dist/lightweight-charts.standalone.production.js"></script>
+
+  <style>
+
+    body {
+
+      margin: 0;
+
+      padding: 10px;
+
+      background: #121212;
+
+      color: white;
+
+      font-family: sans-serif;
+
+      text-align: center;
+
+    }
+
+    #chart-container {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 10px;
+
+    }
+
+    .chart {
+
+      height: 300px;
+
+      width: 100%;
+
+    }
+
+    #difference {
+
+      margin-top: 10px;
+
+      font-size: 14px;
+
+    }
+
+    #controls {
+
+      display: flex;
+
+      justify-content: center;
+
+      gap: 10px;
+
+      margin: 15px 0;
+
+      flex-wrap: wrap;
+
+    }
+
+    button {
+
+      padding: 8px 15px;
+
+      font-size: 14px;
+
+      cursor: pointer;
+
+      border: none;
+
+      border-radius: 4px;
+
+      font-weight: bold;
+
+      min-width: 80px;
+
+    }
+
+    #buy-btn {
+
+      background-color: #4CAF50;
+
+      color: white;
+
+    }
+
+    #sell-btn {
+
+      background-color: #F44336;
+
+      color: white;
+
+    }
+
+    #settings-btn {
+
+      background-color: #2196F3;
+
+      color: white;
+
+    }
+
+    #auto-trade-btn {
+
+      background-color: #FF9800;
+
+      color: white;
+
+    }
+
+    #balance-panel {
+
+      background: #1E1E1E;
+
+      padding: 10px;
+
+      margin: 15px auto;
+
+      max-width: 100%;
+
+      border-radius: 8px;
+
+      font-size: 14px;
+
+    }
+
+    #trade-history {
+
+      background: #1E1E1E;
+
+      padding: 10px;
+
+      margin: 15px auto;
+
+      max-width: 100%;
+
+      border-radius: 8px;
+
+      text-align: left;
+
+      max-height: 150px;
+
+      overflow-y: auto;
+
+      font-size: 12px;
+
+    }
+
+    .alert {
+
+      position: fixed;
+
+      top: 20px;
+
+      right: 10px;
+
+      left: 10px;
+
+      padding: 15px;
+
+      border-radius: 8px;
+
+      color: white;
+
+      font-weight: bold;
+
+      opacity: 0;
+
+      transition: opacity 0.5s;
+
+      z-index: 1000;
+
+      font-size: 14px;
+
+      max-width: 400px;
+
+      margin: 0 auto;
+
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 5px;
+
+    }
+
+    .alert.show {
+
+      opacity: 1;
+
+    }
+
+    .buy-alert {
+
+      background-color: #2E7D32;
+
+      border-left: 5px solid #4CAF50;
+
+    }
+
+    .sell-alert {
+
+      background-color: #C62828;
+
+      border-left: 5px solid #F44336;
+
+    }
+
+    .info-alert {
+
+      background-color: #1565C0;
+
+      border-left: 5px solid #2196F3;
+
+    }
+
+    .alert-header {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      font-size: 16px;
+
+    }
+
+    .alert-price {
+
+      font-weight: normal;
+
+      background: rgba(255, 255, 255, 0.1);
+
+      padding: 3px 8px;
+
+      border-radius: 4px;
+
+    }
+
+    .alert-pl {
+
+      font-size: 13px;
+
+      font-weight: normal;
+
+      margin-top: 5px;
+
+    }
+
+    .stats {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      justify-content: space-around;
+
+      margin-top: 5px;
+
+      gap: 5px;
+
+    }
+
+    .stat-item {
+
+      padding: 5px;
+
+      background: #2A2A2A;
+
+      border-radius: 4px;
+
+      min-width: 100px;
+
+      font-size: 12px;
+
+    }
+
+    .positive {
+
+      color: #4CAF50;
+
+    }
+
+    .negative {
+
+      color: #F44336;
+
+    }
+
+    #settings-panel {
+
+      display: none;
+
+      background: #1E1E1E;
+
+      padding: 15px;
+
+      margin: 15px auto;
+
+      border-radius: 8px;
+
+      max-width: 100%;
+
+    }
+
+    .settings-row {
+
+      margin-bottom: 10px;
+
+      text-align: left;
+
+    }
+
+    .settings-row label {
+
+      display: block;
+
+      margin-bottom: 5px;
+
+      font-size: 14px;
+
+    }
+
+    .settings-row input, .settings-row select {
+
+      width: 100%;
+
+      padding: 8px;
+
+      border-radius: 4px;
+
+      border: none;
+
+      background: #2A2A2A;
+
+      color: white;
+
+    }
+
+    #save-settings {
+
+      background-color: #4CAF50;
+
+      color: white;
+
+      padding: 8px 15px;
+
+      border: none;
+
+      border-radius: 4px;
+
+      cursor: pointer;
+
+      font-weight: bold;
+
+    }
+
+    .toggle-container {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      margin-bottom: 10px;
+
+    }
+
+    .toggle-switch {
+
+      position: relative;
+
+      display: inline-block;
+
+      width: 50px;
+
+      height: 24px;
+
+    }
+
+    .toggle-switch input {
+
+      opacity: 0;
+
+      width: 0;
+
+      height: 0;
+
+    }
+
+    .slider {
+
+      position: absolute;
+
+      cursor: pointer;
+
+      top: 0;
+
+      left: 0;
+
+      right: 0;
+
+      bottom: 0;
+
+      background-color: #ccc;
+
+      transition: .4s;
+
+      border-radius: 24px;
+
+    }
+
+    .slider:before {
+
+      position: absolute;
+
+      content: "";
+
+      height: 16px;
+
+      width: 16px;
+
+      left: 4px;
+
+      bottom: 4px;
+
+      background-color: white;
+
+      transition: .4s;
+
+      border-radius: 50%;
+
+    }
+
+    input:checked + .slider {
+
+      background-color: #2196F3;
+
+    }
+
+    input:checked + .slider:before {
+
+      transform: translateX(26px);
+
+    }
+
+    .trade-card {
+
+      background: #2A2A2A;
+
+      border-radius: 6px;
+
+      padding: 10px;
+
+      margin-bottom: 8px;
+
+      border-left: 4px solid transparent;
+
+    }
+
+    .trade-card.buy {
+
+      border-left-color: #4CAF50;
+
+    }
+
+    .trade-card.sell {
+
+      border-left-color: #F44336;
+
+    }
+
+    .trade-card-header {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      margin-bottom: 5px;
+
+    }
+
+    .trade-card-type {
+
+      font-weight: bold;
+
+    }
+
+    .trade-card-time {
+
+      color: #aaa;
+
+      font-size: 11px;
+
+    }
+
+    .trade-card-details {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      font-size: 12px;
+
+    }
+
+    .trade-card-pl {
+
+      font-weight: bold;
+
+    }
+
+    .trade-card-pl.positive {
+
+      color: #4CAF50;
+
+    }
+
+    .trade-card-pl.negative {
+
+      color: #F44336;
+
+    }
+
+    @media (min-width: 600px) {
+
+      .chart {
+
+        height: 400px;
+
+      }
+
+      .stat-item {
+
+        min-width: 120px;
+
+        font-size: 14px;
+
+      }
+
+      #trade-history {
+
+        max-height: 200px;
+
+        font-size: 14px;
+
+      }
+
+      .alert {
+
+        right: 20px;
+
+        left: auto;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h2 style="font-size: 1.2rem;">SwingBTC Weekly</h2>
+
+  <div id="alert" class="alert"></div>
+
+  
+
+  <div id="chart-container">
+
+    <div id="price-chart" class="chart"></div>
+
+    <div id="pl-chart" class="chart"></div>
+
+  </div>
+
+  
+
+  <div id="difference"></div>
+
+  
+
+  <div id="controls">
+
+    <button id="buy-btn">BUY</button>
+
+    <button id="sell-btn">SELL</button>
+
+    <button id="auto-trade-btn">AUTO TRADE: OFF</button>
+
+    <button id="settings-btn">SETTINGS</button>
+
+  </div>
+
+  
+
+  <div id="settings-panel">
+
+    <h3 style="margin-top: 0;">Demo Settings</h3>
+
+    <div class="settings-row">
+
+      <label for="starting-usd">Starting USD Balance:</label>
+
+      <input type="number" id="starting-usd" min="1" step="1">
+
+    </div>
+
+    <div class="settings-row">
+
+      <label for="starting-btc">Starting BTC Balance:</label>
+
+      <input type="number" id="starting-btc" min="0" step="0.000001">
+
+    </div>
+
+    <div class="settings-row">
+
+      <label for="trade-percent">Trade Percentage (% of balance):</label>
+
+      <input type="number" id="trade-percent" min="1" max="100" value="10">
+
+    </div>
+
+    <div class="toggle-container">
+
+      <label for="alerts-enabled">Enable Alerts:</label>
+
+      <label class="toggle-switch">
+
+        <input type="checkbox" id="alerts-enabled" checked>
+
+        <span class="slider"></span>
+
+      </label>
+
+    </div>
+
+    <button id="save-settings">SAVE & RESET</button>
+
+  </div>
+
+  
+
+  <div id="balance-panel">
+
+    <h3 style="margin-top: 0; font-size: 1rem;">Account Balance</h3>
+
+    <div class="stats">
+
+      <div class="stat-item">USD: <span id="usd-balance">10000.00</span></div>
+
+      <div class="stat-item">BTC: <span id="btc-balance">0.000000</span></div>
+
+      <div class="stat-item">Total: <span id="total-value">10000.00</span></div>
+
+      <div class="stat-item">P/L: <span id="pl-value">0.00</span></div>
+
+    </div>
+
+  </div>
+
+  
+
+  <div id="trade-history">
+
+    <h3 style="margin-top: 0; font-size: 1rem;">Trade History</h3>
+
+    <div id="history-list"></div>
+
+  </div>
+
+
+
+  <script>
+
+    // Initialize state with localStorage or defaults
+
+    const state = {
+
+      usdBalance: parseFloat(localStorage.getItem('usdBalance')) || 10000,
+
+      btcBalance: parseFloat(localStorage.getItem('btcBalance')) || 0,
+
+      trades: JSON.parse(localStorage.getItem('trades')) || [],
+
+      currentPrice: 0,
+
+      initialBalance: parseFloat(localStorage.getItem('initialBalance')) || 10000,
+
+      alertsEnabled: localStorage.getItem('alertsEnabled') !== 'false',
+
+      position: null,
+
+      positionOpenPrice: 0,
+
+      tradePercent: parseFloat(localStorage.getItem('tradePercent')) || 10,
+
+      autoTrade: localStorage.getItem('autoTrade') === 'true',
+
+      plHistory: JSON.parse(localStorage.getItem('plHistory')) || [],
+
+      weeklyData: [],
+
+      lastSignal: null
+
+    };
+
+
+
+    // DOM elements
+
+    const buyBtn = document.getElementById('buy-btn');
+
+    const sellBtn = document.getElementById('sell-btn');
+
+    const autoTradeBtn = document.getElementById('auto-trade-btn');
+
+    const settingsBtn = document.getElementById('settings-btn');
+
+    const usdBalanceEl = document.getElementById('usd-balance');
+
+    const btcBalanceEl = document.getElementById('btc-balance');
+
+    const totalValueEl = document.getElementById('total-value');
+
+    const plValueEl = document.getElementById('pl-value');
+
+    const historyList = document.getElementById('history-list');
+
+    const alertEl = document.getElementById('alert');
+
+    const settingsPanel = document.getElementById('settings-panel');
+
+    const startingUsdInput = document.getElementById('starting-usd');
+
+    const startingBtcInput = document.getElementById('starting-btc');
+
+    const tradePercentInput = document.getElementById('trade-percent');
+
+    const alertsEnabledCheckbox = document.getElementById('alerts-enabled');
+
+    const saveSettingsBtn = document.getElementById('save-settings');
+
+
+
+    // Initialize settings inputs
+
+    startingUsdInput.value = state.initialBalance;
+
+    startingBtcInput.value = state.btcBalance;
+
+    tradePercentInput.value = state.tradePercent;
+
+    alertsEnabledCheckbox.checked = state.alertsEnabled;
+
+    autoTradeBtn.textContent = `AUTO TRADE: ${state.autoTrade ? 'ON' : 'OFF'}`;
+
+    autoTradeBtn.style.backgroundColor = state.autoTrade ? '#4CAF50' : '#FF9800';
+
+
+
+    // Chart setup
+
+    const priceChart = LightweightCharts.createChart(document.getElementById('price-chart'), {
+
+      layout: { 
+
+        background: { color: '#121212' }, 
+
+        textColor: '#fff',
+
+        fontSize: 12
+
+      },
+
+      grid: { 
+
+        vertLines: { color: '#333' }, 
+
+        horzLines: { color: '#333' } 
+
+      },
+
+      timeScale: { 
+
+        timeVisible: true,
+
+        fontSize: 10
+
+      },
+
+      crosshair: {
+
+        mode: LightweightCharts.CrosshairMode.Normal,
+
+      },
+
+      localization: {
+
+        priceFormatter: (price) => parseFloat(price).toFixed(2)
+
+      }
+
+    });
+
+
+
+    const plChart = LightweightCharts.createChart(document.getElementById('pl-chart'), {
+
+      layout: { 
+
+        background: { color: '#121212' }, 
+
+        textColor: '#fff',
+
+        fontSize: 12
+
+      },
+
+      grid: { 
+
+        vertLines: { color: '#333' }, 
+
+        horzLines: { color: '#333' } 
+
+      },
+
+      timeScale: {
+
+        timeVisible: true,
+
+        fontSize: 10
+
+      },
+
+      localization: {
+
+        priceFormatter: (price) => '$' + parseFloat(price).toFixed(2)
+
+      }
+
+    });
+
+
+
+    const candleSeries = priceChart.addCandlestickSeries();
+
+    const plSeries = plChart.addLineSeries({
+
+      color: '#4CAF50',
+
+      lineWidth: 2
+
+    });
+
+    const markerData = [];
+
+
+
+    // Update balance display
+
+    function updateBalances() {
+
+      usdBalanceEl.textContent = state.usdBalance.toFixed(2);
+
+      btcBalanceEl.textContent = state.btcBalance.toFixed(6);
+
+      
+
+      const totalValue = state.usdBalance + (state.btcBalance * state.currentPrice);
+
+      totalValueEl.textContent = totalValue.toFixed(2);
+
+      
+
+      const pl = totalValue - state.initialBalance;
+
+      plValueEl.textContent = pl.toFixed(2);
+
+      plValueEl.className = pl >= 0 ? 'positive' : 'negative';
+
+      
+
+      // Save to localStorage
+
+      localStorage.setItem('usdBalance', state.usdBalance);
+
+      localStorage.setItem('btcBalance', state.btcBalance);
+
+      
+
+      // Update P/L history if we have weekly data
+
+      if (state.weeklyData.length > 0) {
+
+        updatePlHistory();
+
+      }
+
+    }
+
+
+
+    // Update P/L history
+
+    function updatePlHistory() {
+
+      const currentTime = state.weeklyData[state.weeklyData.length - 1].time;
+
+      const totalValue = state.usdBalance + (state.btcBalance * state.currentPrice);
+
+      const pl = totalValue - state.initialBalance;
+
+      
+
+      // Check if we already have an entry for this time
+
+      const existingIndex = state.plHistory.findIndex(item => item.time === currentTime);
+
+      
+
+      if (existingIndex >= 0) {
+
+        state.plHistory[existingIndex].value = pl;
+
+      } else {
+
+        state.plHistory.push({ time: currentTime, value: pl });
+
+      }
+
+      
+
+      // Keep only the last 100 points
+
+      if (state.plHistory.length > 100) {
+
+        state.plHistory.shift();
+
+      }
+
+      
+
+      localStorage.setItem('plHistory', JSON.stringify(state.plHistory));
+
+      plSeries.setData(state.plHistory);
+
+    }
+
+
+
+    // Show alert with card design
+
+    function showAlert(message, type, price = null, pl = null) {
+
+      if (!state.alertsEnabled) return;
+
+      
+
+      alertEl.innerHTML = '';
+
+      
+
+      const header = document.createElement('div');
+
+      header.className = 'alert-header';
+
+      header.innerHTML = `
+
+        <span>${message}</span>
+
+        ${price ? `<span class="alert-price">$${price.toFixed(2)}</span>` : ''}
+
+      `;
+
+      
+
+      alertEl.appendChild(header);
+
+      
+
+      if (pl !== null) {
+
+        const plElement = document.createElement('div');
+
+        plElement.className = 'alert-pl';
+
+        plElement.innerHTML = `P/L: <span class="${pl >= 0 ? 'positive' : 'negative'}">$${Math.abs(pl).toFixed(2)} (${((pl / state.initialBalance) * 100).toFixed(2)}%)</span>`;
+
+        alertEl.appendChild(plElement);
+
+      }
+
+      
+
+      alertEl.className = `alert ${type}-alert show`;
+
+      
+
+      setTimeout(() => {
+
+        alertEl.classList.remove('show');
+
+      }, 5000);
+
+    }
+
+
+
+    // Add trade to history with card design
+
+    function addTrade(type, price, amount, total, pl = null) {
+
+      const now = new Date();
+
+      const trade = {
+
+        id: Date.now(),
+
+        type,
+
+        price,
+
+        amount,
+
+        total,
+
+        pl,
+
+        timestamp: now.toISOString(),
+
+        timeString: now.toLocaleString()
+
+      };
+
+      
+
+      state.trades.unshift(trade);
+
+      localStorage.setItem('trades', JSON.stringify(state.trades));
+
+      
+
+      // Update history display with card design
+
+      const tradeEl = document.createElement('div');
+
+      tradeEl.className = `trade-card ${type.toLowerCase()}`;
+
+      
+
+      let plDisplay = '';
+
+      if (pl !== null) {
+
+        plDisplay = `
+
+          <div class="trade-card-pl ${pl >= 0 ? 'positive' : 'negative'}">
+
+            P/L: $${Math.abs(pl).toFixed(2)} (${((pl / state.initialBalance) * 100).toFixed(2)}%)
+
+          </div>
+
+        `;
+
+      }
+
+      
+
+      tradeEl.innerHTML = `
+
+        <div class="trade-card-header">
+
+          <span class="trade-card-type">${type}</span>
+
+          <span class="trade-card-time">${trade.timeString}</span>
+
+        </div>
+
+        <div class="trade-card-details">
+
+          <div>
+
+            Price: $${price.toFixed(2)}<br>
+
+            Amount: ${amount.toFixed(6)} BTC
+
+          </div>
+
+          ${plDisplay}
+
+        </div>
+
+      `;
+
+      
+
+      historyList.insertBefore(tradeEl, historyList.firstChild);
+
+      
+
+      // Limit history to 50 items
+
+      if (historyList.children.length > 50) {
+
+        historyList.removeChild(historyList.lastChild);
+
+      }
+
+    }
+
+
+
+    // Execute buy
+
+    function executeBuy() {
+
+      if (state.currentPrice <= 0) {
+
+        showAlert('No price data available', 'info');
+
+        return;
+
+      }
+
+      
+
+      const usdAmount = state.usdBalance * (state.tradePercent / 100);
+
+      const btcAmount = usdAmount / state.currentPrice;
+
+      
+
+      if (usdAmount < 1) {
+
+        showAlert('Not enough USD for buy', 'info');
+
+        return;
+
+      }
+
+      
+
+      state.usdBalance -= usdAmount;
+
+      state.btcBalance += btcAmount;
+
+      state.position = 'long';
+
+      state.positionOpenPrice = state.currentPrice;
+
+      
+
+      addTrade('BUY', state.currentPrice, btcAmount, usdAmount);
+
+      updateBalances();
+
+      
+
+      // Show alert with price
+
+      showAlert(
+
+        `Bought ${btcAmount.toFixed(6)} BTC`, 
+
+        'buy', 
+
+        state.currentPrice
+
+      );
+
+    }
+
+
+
+    // Execute sell
+
+    function executeSell() {
+
+      if (state.currentPrice <= 0) {
+
+        showAlert('No price data available', 'info');
+
+        return;
+
+      }
+
+      
+
+      if (state.btcBalance <= 0) {
+
+        showAlert('No BTC to sell', 'info');
+
+        return;
+
+      }
+
+      
+
+      // Sell entire BTC position
+
+      const usdAmount = state.btcBalance * state.currentPrice;
+
+      
+
+      state.usdBalance += usdAmount;
+
+      const btcAmount = state.btcBalance;
+
+      state.btcBalance = 0;
+
+      
+
+      const pl = (state.currentPrice - state.positionOpenPrice) * btcAmount;
+
+      
+
+      addTrade('SELL', state.currentPrice, btcAmount, usdAmount, pl);
+
+      updateBalances();
+
+      
+
+      // Show alert with price and P/L
+
+      showAlert(
+
+        `Sold ${btcAmount.toFixed(6)} BTC`, 
+
+        'sell', 
+
+        state.currentPrice,
+
+        pl
+
+      );
+
+      
+
+      state.position = null;
+
+      state.positionOpenPrice = 0;
+
+    }
+
+
+
+    // Toggle auto trading
+
+    function toggleAutoTrade() {
+
+      state.autoTrade = !state.autoTrade;
+
+      localStorage.setItem('autoTrade', state.autoTrade);
+
+      autoTradeBtn.textContent = `AUTO TRADE: ${state.autoTrade ? 'ON' : 'OFF'}`;
+
+      autoTradeBtn.style.backgroundColor = state.autoTrade ? '#4CAF50' : '#FF9800';
+
+      showAlert(`Auto trading ${state.autoTrade ? 'enabled' : 'disabled'}`, 'info');
+
+    }
+
+
+
+    // Reset demo with new settings
+
+    function resetDemo() {
+
+      const startingUsd = parseFloat(startingUsdInput.value) || 10000;
+
+      const startingBtc = parseFloat(startingBtcInput.value) || 0;
+
+      const tradePercent = parseFloat(tradePercentInput.value) || 10;
+
+      const alertsEnabled = alertsEnabledCheckbox.checked;
+
+      
+
+      state.usdBalance = startingUsd;
+
+      state.btcBalance = startingBtc;
+
+      state.initialBalance = startingUsd + (startingBtc * state.currentPrice);
+
+      state.tradePercent = tradePercent;
+
+      state.alertsEnabled = alertsEnabled;
+
+      state.trades = [];
+
+      state.plHistory = [];
+
+      
+
+      localStorage.setItem('usdBalance', state.usdBalance);
+
+      localStorage.setItem('btcBalance', state.btcBalance);
+
+      localStorage.setItem('initialBalance', state.initialBalance);
+
+      localStorage.setItem('tradePercent', state.tradePercent);
+
+      localStorage.setItem('alertsEnabled', state.alertsEnabled);
+
+      localStorage.setItem('trades', JSON.stringify([]));
+
+      localStorage.setItem('plHistory', JSON.stringify([]));
+
+      
+
+      // Clear trade history display
+
+      historyList.innerHTML = '';
+
+      
+
+      updateBalances();
+
+      showAlert('Demo reset with new settings', 'info');
+
+    }
+
+
+
+    // Event listeners
+
+    buyBtn.addEventListener('click', executeBuy);
+
+    sellBtn.addEventListener('click', executeSell);
+
+    autoTradeBtn.addEventListener('click', toggleAutoTrade);
+
+    settingsBtn.addEventListener('click', () => {
+
+      settingsPanel.style.display = settingsPanel.style.display === 'block' ? 'none' : 'block';
+
+    });
+
+    saveSettingsBtn.addEventListener('click', resetDemo);
+
+
+
+    // Initialize UI
+
+    updateBalances();
+
+    
+
+    // Load trade history with card design
+
+    state.trades.forEach(trade => {
+
+      const tradeEl = document.createElement('div');
+
+      tradeEl.className = `trade-card ${trade.type.toLowerCase()}`;
+
+      
+
+      let plDisplay = '';
+
+      if (trade.pl !== null && trade.pl !== undefined) {
+
+        plDisplay = `
+
+          <div class="trade-card-pl ${trade.pl >= 0 ? 'positive' : 'negative'}">
+
+            P/L: $${Math.abs(trade.pl).toFixed(2)} (${((trade.pl / state.initialBalance) * 100).toFixed(2)}%)
+
+          </div>
+
+        `;
+
+      }
+
+      
+
+      tradeEl.innerHTML = `
+
+        <div class="trade-card-header">
+
+          <span class="trade-card-type">${trade.type}</span>
+
+          <span class="trade-card-time">${trade.timeString}</span>
+
+        </div>
+
+        <div class="trade-card-details">
+
+          <div>
+
+            Price: $${trade.price.toFixed(2)}<br>
+
+            Amount: ${trade.amount.toFixed(6)} BTC
+
+          </div>
+
+          ${plDisplay}
+
+        </div>
+
+      `;
+
+      historyList.appendChild(tradeEl);
+
+    });
+
+
+
+    // Chart data loading
+
+    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000')
+
+      .then(res => res.json())
+
+      .then(data => {
+
+        // Convert Binance data to our format
+
+        const daily = data.map(item => ({
+
+          time: Math.floor(item[0] / 1000), // Convert timestamp to seconds
+
+          open: parseFloat(item[1]),
+
+          high: parseFloat(item[2]),
+
+          low: parseFloat(item[3]),
+
+          close: parseFloat(item[4])
+
+        }));
+
+
+
+        // Group by week (Monday to Sunday)
+
+        const weekly = [];
+
+        let currentWeek = null;
+
+        let weekData = [];
+
+
+
+        daily.forEach((candle, index) => {
+
+          const date = new Date(candle.time * 1000);
+
+          // Get year and week number
+
+          const year = date.getFullYear();
+
+          const oneJan = new Date(year, 0, 1);
+
+          const weekNumber = Math.ceil((((date - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+
+          const weekYear = `${year}-W${weekNumber}`;
+
+
+
+          if (currentWeek !== weekYear) {
+
+            if (weekData.length > 0) {
+
+              // Create weekly candle from daily data
+
+              const o = weekData[0].open;
+
+              const c = weekData[weekData.length - 1].close;
+
+              const h = Math.max(...weekData.map(p => p.high));
+
+              const l = Math.min(...weekData.map(p => p.low));
+
+              const t = weekData[0].time;
+
+              weekly.push({ time: t, open: o, high: h, low: l, close: c });
+
+            }
+
+            currentWeek = weekYear;
+
+            weekData = [];
+
+          }
+
+
+
+          weekData.push(candle);
+
+        });
+
+
+
+        // Add the last week if it exists
+
+        if (weekData.length > 0) {
+
+          const o = weekData[0].open;
+
+          const c = weekData[weekData.length - 1].close;
+
+          const h = Math.max(...weekData.map(p => p.high));
+
+          const l = Math.min(...weekData.map(p => p.low));
+
+          const t = weekData[0].time;
+
+          weekly.push({ time: t, open: o, high: h, low: l, close: c });
+
+        }
+
+
+
+        candleSeries.setData(weekly);
+
+        state.weeklyData = weekly;
+
+        
+
+        // Set current price to the latest close
+
+        if (weekly.length > 0) {
+
+          state.currentPrice = weekly[weekly.length - 1].close;
+
+          
+
+          // If initial balance wasn't set (first load), calculate it
+
+          if (!localStorage.getItem('initialBalance')) {
+
+            state.initialBalance = state.usdBalance + (state.btcBalance * state.currentPrice);
+
+            localStorage.setItem('initialBalance', state.initialBalance);
+
+          }
+
+          
+
+          updateBalances();
+
+          
+
+          // Initialize P/L history if empty
+
+          if (state.plHistory.length === 0) {
+
+            state.plHistory = weekly.map(candle => ({
+
+              time: candle.time,
+
+              value: 0
+
+            }));
+
+            plSeries.setData(state.plHistory);
+
+          }
+
+        }
+
+
+
+        const greenHeights = [];
+
+        const diffSeries = priceChart.addLineSeries({
+
+          color: 'rgba(255, 0, 0, 0.7)',
+
+          lineWidth: 2,
+
+        });
+
+
+
+        const diffPoints = [];
+
+
+
+        for (let i = 0; i < weekly.length; i++) {
+
+          const candle = weekly[i];
+
+          const height = candle.high - candle.low;
+
+
+
+          if (candle.close > candle.open) {
+
+            greenHeights.push(height);
+
+            if (greenHeights.length > 5) greenHeights.shift();
+
+          }
+
+
+
+          const avg = greenHeights.length > 0 ? greenHeights.reduce((a, b) => a + b) / greenHeights.length : null;
+
+          const heightDiff = avg ? (height - avg) / avg * 100 : null; // Convert to percentage difference
+
+
+
+          if (heightDiff != null) {
+
+            diffPoints.push({ time: candle.time, value: heightDiff });
+
+
+
+            // Only add markers when we have enough data (at least 5 green weeks)
+
+            if (greenHeights.length >= 5) {
+
+              const prev = diffPoints.length > 1 ? diffPoints[diffPoints.length - 2].value : null;
+
+              if (prev != null) {
+
+                if (prev < heightDiff && heightDiff > 0) {
+
+                  markerData.push({
+
+                    time: candle.time,
+
+                    position: 'aboveBar',
+
+                    color: 'green',
+
+                    shape: 'arrowUp',
+
+                    text: 'BUY'
+
+                  });
+
+                  
+
+                  // Show signal alert for the latest candle
+
+                  if (i === weekly.length - 1) {
+
+                    state.lastSignal = { type: 'buy', price: candle.close };
+
+                    showAlert('BUY signal detected!', 'buy', candle.close);
+
+                    if (state.autoTrade) {
+
+                      executeBuy();
+
+                    }
+
+                  }
+
+                } else if (prev > heightDiff && heightDiff < 0) {
+
+                  markerData.push({
+
+                    time: candle.time,
+
+                    position: 'belowBar',
+
+                    color: 'red',
+
+                    shape: 'arrowDown',
+
+                    text: 'SELL'
+
+                  });
+
+                  
+
+                  // Show signal alert for the latest candle
+
+                  if (i === weekly.length - 1) {
+
+                    state.lastSignal = { type: 'sell', price: candle.close };
+
+                    showAlert('SELL signal detected!', 'sell', candle.close);
+
+                    if (state.autoTrade) {
+
+                      executeSell();
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+
+
+        diffSeries.setData(diffPoints);
+
+        candleSeries.setMarkers(markerData);
+
+        
+
+        // Add a legend to explain the red line
+
+        document.getElementById('difference').innerHTML = 
+
+          '<p>Red line shows percentage difference between current candle height and 5-week average of green candle heights</p>';
+
+      })
+
+      .catch(err => {
+
+        document.getElementById('difference').innerText = 'Error loading BTC data: ' + err.message;
+
+        console.error(err);
+
+      });
+
+  </script>
+
+</body>
+
+</html>
